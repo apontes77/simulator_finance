@@ -5,7 +5,11 @@ import java.math.RoundingMode
 
 // 1. Value Class para Moeda - Proteção de tipo e performance
 @JvmInline
-value class Money(val value: BigDecimal) {
+value class Money(val value: BigDecimal) : Comparable<Money> {
+
+    //implementa a funcao compareTo
+    override fun compareTo(other: Money): Int = this.value.compareTo(other.value)
+
     operator fun plus(other: Money) = Money(this.value.add(other.value).setScale(2, RoundingMode.HALF_UP))
     operator fun minus(other: Money) = Money(this.value.subtract(other.value).setScale(2, RoundingMode.HALF_UP))
     operator fun times(factor: Double) = Money(this.value.multiply(factor.toBigDecimal()).setScale(2, RoundingMode.HALF_UP))
@@ -37,4 +41,9 @@ data class Installment(
     val interest: Money,   // Juros do mês
     val total: Money,      // Parcela total (Amortização + Juros)
     val remainingBalance: Money // Saldo Devedor após a parcela
+)
+
+data class ExtraPayment(
+    val month: Int,
+    val amount: Money
 )
