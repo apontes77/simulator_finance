@@ -26,14 +26,41 @@ fun loadExtraPaymentFromCsv(filePath: String): List<ExtraPayment> {
         }
 }
 
-fun main () {
+//fun main () {
+//    val params = LoanParameters(
+//        totalAmount = 250000.0.reais,
+//        yearlyInterestRate = 11.5.percent,
+//        termInMonths = 360
+//    )
+//
+//    //lendo do arquivo csv
+//    val csvPath = "amortizacoes.csv"
+//    val extraPayments = loadExtraPaymentFromCsv(csvPath)
+//
+//    val baseSchedule = calculateSAC(params)
+//    val optimizedSchedule = calculateSAC(params, extraPayments)
+//
+//    printComparison(
+//        base = baseSchedule.toSummary("cenário base", params.startDate),
+//        optimized = optimizedSchedule.toSummary("cenário com csv", params.startDate)
+//    )
+//}
+
+
+
+suspend fun main() {
+    val bcbService = BcbService()
+
+    println("🔍 Consultando Selic atual no Banco Central...")
+    val currentSelic = bcbService.fetchCurrentSelicRate()
+    println("✅ Taxa Selic encontrada: $currentSelic% ao ano.\n")
+
     val params = LoanParameters(
         totalAmount = 250000.0.reais,
-        yearlyInterestRate = 11.5.percent,
+        yearlyInterestRate = currentSelic.percent, // Usando a taxa real da API
         termInMonths = 360
     )
 
-    //lendo do arquivo csv
     val csvPath = "amortizacoes.csv"
     val extraPayments = loadExtraPaymentFromCsv(csvPath)
 
@@ -41,7 +68,7 @@ fun main () {
     val optimizedSchedule = calculateSAC(params, extraPayments)
 
     printComparison(
-        base = baseSchedule.toSummary("cenário base", params.startDate),
-        optimized = optimizedSchedule.toSummary("cenário com csv", params.startDate)
+        base = baseSchedule.toSummary("Cenário Base (Selic)", params.startDate),
+        optimized = optimizedSchedule.toSummary("Cenário com Aportes", params.startDate)
     )
 }
